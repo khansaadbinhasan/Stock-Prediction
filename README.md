@@ -7,6 +7,13 @@ This repository is a part of my Minor-Project at my college and part of my ongoi
 
 Running this file will create a graph that can be used to observe the effects of twitter sentiment on stock market.
 
+## Installation
+Download then extract the zip file or use ```git clone https://github.com/khansaadbinhasan/Stock-Prediction```                              
+
+`cd` to the git directory and run ```sudo -H pip3 install -r requirements.txt```
+
+`cd` to `SentimentAnalysis` directory and change `configuring.py` according to your needs
+
 ### Usage
 To run use: ```python3 plotSent.py <company-name> <subjectivity-threshold> <scaling-factor>```.
 
