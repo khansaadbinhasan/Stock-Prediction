@@ -9,6 +9,7 @@ Running this file will create a graph that can be used to observe the effects of
 
 ## Installation
 Download then extract the zip file or use ```git clone https://github.com/khansaadbinhasan/Stock-Prediction```                              
+Download the Data From [this link](https://drive.google.com/open?id=1qx6us2Iv4E2_Ff8NZnNPrJ-nWGdcVulL) or plug in your own and add it in `StockPrediction` Directory
 
 `cd` to the git directory and run ```sudo -H pip3 install -r requirements.txt```
 
@@ -22,9 +23,5 @@ For example, for `Accenture` with `scaling-factor` of `5` and `subjectivity-thre
 ```python3 plotSent.py Accenture 0.1 5```
 
 
-
-
 ### Files and Folders:
 * __*plotSent.py*__: Main file containing the code for preprocessing and plotting.
-
-[link to Data](https://drive.google.com/open?id=1qx6us2Iv4E2_Ff8NZnNPrJ-nWGdcVulL)
