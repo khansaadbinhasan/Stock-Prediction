@@ -4,11 +4,11 @@ This model makes a plot between Z-Scores of DJIA & Twitter Sentiment Polarity an
 This repository is a part of my Minor-Project at my college and part of my ongoing efforts to write a paper on Sentiment Analysis.
 
 ## Content
-* __Details__
-* __Installation__
-* __Usage__
-* __Files and Folders__
-* __How to get Data?__
+* [__Details__](#details)
+* [__Installation__](#installation)
+* [__Usage__](#usage)
+* [__Files and Folders__](#files-and-folders)
+* [__How to get Data?__](#how-to-get-data)
 
 ## Details
 The Concept behind this project is very simple, Quantify peoples' Sentiment about a certain company, Are they thinking positive about a company or negative, The idea is people talk about companies on twitter, when they talk positive then a positive air around the company is generated and people are likely to invest more in that company resulting in better stock prices, Or if company does something unpopular then it will have a negative sentiment among people and its stock will plummet.
@@ -54,6 +54,7 @@ __intermediateFileTwitter__(*string*): The address to the intermediate Data file
 __outputFileTwitter__(*string*):The address to the output Data of Twitter generated after complete preprocessing, and is used to generate the Twitter Sentiment plots.
 
 __doTwitterPreprocessing__(*boolean*): Twitter Data Preprocessing is a computation intensive task, and you have to only do it once, so set This to `True` only the first time and once you are done, set this to `False` so you only generate plots without unnecessary preprocessing.
+
 __doDJIAPreprocessing__(*boolean*): Set this to `True` only the first time and then set this to `False`.	
 
 __PlotGraphs__(*boolean*): If you want to build the graph set this to `True` or If you want to just do the Preprocessing set this to `False`  
