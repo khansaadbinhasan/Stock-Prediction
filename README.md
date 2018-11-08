@@ -1,5 +1,5 @@
 # Stock Prediction Of Popular Companies using Sentiment Analysis of Twitter
-This model makes a plot between Z-Scores of DJIA & Twitter Sentiment Polarity and Date, Two plots are made on same figure to get an idea of the correlation. Historical DJIA data is used for Plotting Stock market Z-Scores and textblob is used for Twitter Sentiment Analysis. 
+This model makes a plot between Z-Scores of DJIA & Twitter Sentiment Polarity and Date, Two plots are made on same figure to get an idea of the correlation. Historical DJIA data is used for getting Stock market Z-Scores and textblob is used for Twitter Sentiment Analysis. 
 
 This repository is a part of my Minor-Project at my college and part of my ongoing efforts to write a paper on Sentiment Analysis.
 
@@ -11,7 +11,8 @@ This repository is a part of my Minor-Project at my college and part of my ongoi
 * [__How to get Data?__](#how-to-get-data)
 
 ## Details
-The Concept behind this project is very simple, Quantify peoples' Sentiment about a certain company, Are they thinking positive about a company or negative, The idea is people talk about companies on twitter, when they talk positive then a positive air around the company is generated and people are likely to invest more in that company resulting in better stock prices, Or if company does something unpopular then it will have a negative sentiment among people and its stock will plummet.
+The Concept behind this project is very simple, Quantify peoples' Sentiment about a certain company, Are they thinking positive about a company or negative, The idea is people talk about companies on twitter, when they talk positive then a positive air around the company is generated and people are likely to invest more in that company resulting in better stock prices, Alternatively if company does something unpopular then it will have a negative sentiment among people and its stock will plummet.
+
 For Stock Market we took `DJIA historical Data`([What is DJIA?](https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average)), Found the `Z-Scores`([What is Z-Score](https://en.wikipedia.org/wiki/Standard_score)) for the `Adjusted Closing Price` and plotted it with date on X-axis. For Twitter Data, we took tweets and then passed them through `textblob`([What is textblob](https://textblob.readthedocs.io/en/dev/)), thus getting values for their [polarity and subjectivity](https://textblob.readthedocs.io/en/dev/quickstart.html#sentiment-analysis), We then found the `Z-Scores` of `Polarity` on each day and filtered them according to `subjectivity`(hence `subjectivity threshold`) and plotted them alongside `DJIA` data. Since, we needed comparable graphs a `scaling factor` is incorporated which can be tuned to give more comparable graphs.
 For more detailed discussion please read the accompanying [Blog](link to blog)
 
@@ -36,11 +37,13 @@ To run use:
 python3 plotSent.py --company <company-name> --Zscale <z-scaling-factor> --threshold <subjectivity-threshold>
 ```
 
-For example, for `Accenture` with `scaling-factor` of `5` and `subjectivity-threshold of 0.1` use:
+For example, for `Accenture` with `scaling-factor` of `5` and `subjectivity-threshold` of `0.1` use:
 
 ```bash
 python3 plotSent.py --company Accenture --Zscale 5 --threshold 0.1
 ```
+After running the above command Following graph was obtained
+![Screenchot of Accenture graph](https://github.com/khansaadbinhasan/Stock-Prediction/blob/master/Screenshot%20from%202018-11-07%2023-26-07.png)
 
 ## Files and Folders:
 * __*plotSent.py*__: Main file containing the code for preprocessing and plotting, Unless you need to do any changes to existing code you will not have to open it, use `configuring.py` to configure the parameters and use command line for tuning other parameters.
