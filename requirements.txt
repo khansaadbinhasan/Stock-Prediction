@@ -1,7 +1,10 @@
 matplotlib
-pandas
+pandas 
 datetime
-textblob
+textblob 
 langdetect
-numpy
+numpy 
 sys
+getopt
+traceback
+time

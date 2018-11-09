@@ -9,7 +9,7 @@ outputFileTwitter = '../Datasets/New Companies/{}.csv'
 
 # Do Preprocessing
 doTwitterPreprocessing = False
-doDJIAPreprocessing = False	
+doDJIAPreprocessing = False
 
 # Plot Graphs
 PlotGraphs = True

@@ -5,13 +5,15 @@ from textblob import TextBlob
 from langdetect import detect
 import numpy as np
 import sys , getopt
+import traceback
+import time
 
 # from configuring import *	
 from configuring import inputFileDJIA , outputFileDJIA , inputFileTwitter , intermediateFileTwitter , outputFileTwitter , doTwitterPreprocessing , doDJIAPreprocessing , PlotGraphs 
 
 def configurables(TwitterIntermediate,TwitterOutput,threshold=0.1,ZScaling=7.5):
-	sentimentDataset = pd.read_csv(TwitterIntermediate,encoding='utf-8',error_bad_lines=False,low_memory=False)
-	sentimentDataset = sentimentDataset[sentimentDataset['subjectivity'] > threshold ]
+	sentimentDataset = pd.read_csv(TwitterIntermediate,encoding='ISO-8859-1',error_bad_lines=False,low_memory=False)
+	sentimentDataset = sentimentDataset[sentimentDataset['subjectivity'] >= threshold ]
 
 	# Calculating Z-Scores
 	mu = sentimentDataset['polarity'].mean()
@@ -26,7 +28,7 @@ def configurables(TwitterIntermediate,TwitterOutput,threshold=0.1,ZScaling=7.5):
 def prepare_data( TwitterInput , TwitterIntermediate ):
 	
 	#Reading File
-	sentimentDataset = pd.read_csv(TwitterInput,encoding='utf-8',error_bad_lines=False,low_memory=False,index_col=None)
+	sentimentDataset = pd.read_csv(TwitterInput,encoding='utf-8',error_bad_lines=False,index_col=None,engine='python')
 
 	# Making a new column for grouping and Sorting according to DateTime
 	sentimentDataset.rename(columns={"date":"DateTime"},inplace=True)
@@ -34,6 +36,7 @@ def prepare_data( TwitterInput , TwitterIntermediate ):
 	sentimentDataset['Date'] = sentimentDataset['DateTime'].dt.date
 	sentimentDataset.sort_values(by='DateTime',inplace=True)
 	sentimentDataset.reset_index()
+	sentimentDataset.dropna()
 
 	print("The Shape of the file now is:",sentimentDataset.shape)
 
@@ -62,13 +65,18 @@ def prepare_data( TwitterInput , TwitterIntermediate ):
 			if index % 500 is 0:
 				print("On row: ",index)
 				print(text)
-				print("Sentiment:\tPolarity"+str(sentimentDataset.loc[index,'polarity'])+"\tSubjectivity:"+str(sentimentDataset.loc[index,'subjectivity']))
+				print("Language of tweet is:",sentimentDataset.loc[index,'lang'])
+				print("Sentiment:\tPolarity:"+str(sentimentDataset.loc[index,'polarity'])+"\tSubjectivity:"+str(sentimentDataset.loc[index,'subjectivity']))
 				print("Day is:",sentimentDataset.loc[index,'Day'],"on:",sentimentDataset.loc[index,'Date'])
-				print("\n\n")
+				end = time.time()
+				print("Time passed since starting:"+str(round(end-start))+"s")
+				print("\n"*2)
 
 		except Exception as e:
-			print("Following Exception occured")
-			print("\n"*2 + e + "\n"*2)
+			traceback.print_exc()
+			print("\n"*2)
+			print("Something is wrong see above error for more details.")
+			print("Action:Ignoring this row and continuing.")
 			continue
 
 
@@ -77,12 +85,11 @@ def prepare_data( TwitterInput , TwitterIntermediate ):
 	sentimentDataset = sentimentDataset[['Date','Day','text','lang','polarity','subjectivity']]
 	sentimentDataset.drop_duplicates(subset=['text'],inplace=True)
 
-
 	# removing non-english tweets and writing to the output file
 	sentimentDataset.dropna()
 	sentimentDataset = sentimentDataset[sentimentDataset['lang'] == 'en']
-	sentimentDataset = sentimentDataset[sentimentDataset['Day'] != 'Sunday']
-	sentimentDataset = sentimentDataset[sentimentDataset['Day'] != 'Saturday']
+	# sentimentDataset = sentimentDataset[sentimentDataset['Day'] != 'Sunday']
+	# sentimentDataset = sentimentDataset[sentimentDataset['Day'] != 'Saturday']
 	sentimentDataset = sentimentDataset[~( sentimentDataset['text'].str.contains('http') | sentimentDataset['text'].str.contains('https') )]
 	sentimentDataset.set_index('Date',inplace=True)
 	
@@ -170,41 +177,45 @@ def main(argv):
 		opts, args = getopt.getopt(argv, "", ("company=", "Zscale=", "threshold="))
 		
 	except getopt.GetoptError:
+		traceback.print_exc()
+		print("\n"*2)
+		print("Something is wrong see above error for more details.")
+		print("Action: exiting. Please make sure command is correct.")
 		print('plotSent.py --company <company-name> --Zscale <z-scaling-factor> --threshold <subjectivity-threshold>')
 		sys.exit(2)
 
 
 	for opt, arg in opts:
 		if opt == '--h' or opt == '-h':
-			print('plotSent.py --Zscale <z-scaling-factor> --threshold <subjectivity-threshold>')
+			print('python3 plotSent.py --company <company-name> --Zscale <z-scaling-factor> --threshold <subjectivity-threshold>')
 			sys.exit()
 		elif opt == "--company":
 			company = arg
 		elif opt == "--Zscale":
-			print("here")
 			configure['ZScaling'] = float(arg)
 		elif opt == "--threshold":
 			configure['threshold'] = float(arg)
 
 	try:
 		run(configure=configure,company=company,doTwitterPreprocessing=doTwitterPreprocessing,doDJIAPreprocessing=doDJIAPreprocessing,PlotGraphs=PlotGraphs)
+
 	except Exception as e:
-		print("The Following Exception occured:")
+		traceback.print_exc()
 		print('\n'*2)
-		print(e)
-		print('\n'*2)
-		print("Please Check the parameters provided.")
-		print("Something wrong with parameters.")
-		print("Running with default parameters.")
+		print("Something is wrong see above error for more details.")
+		print("Action:Running with default parameters.")
 		print("Company: ",'Accenture')
 		print("ZScaling: ",configure['ZScaling'])
 		print("threshold: ",configure['threshold'])
 		
 		try:
 			run(configure=configure,doTwitterPreprocessing=doTwitterPreprocessing,doDJIAPreprocessing=doDJIAPreprocessing,PlotGraphs=PlotGraphs)
-		except:
-			print("Please provide the company-name")
+		
+		except Exception as e:
+			traceback.print_exc()
+			sys.exit(3)
 
 
 if __name__ == '__main__':
+	start = time.time()
 	main(sys.argv[1:])
