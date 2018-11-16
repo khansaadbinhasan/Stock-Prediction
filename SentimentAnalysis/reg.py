@@ -17,7 +17,10 @@ def preprocess_tweet(tweetText):
 	print("After removing link:\n", preprocessingTweet,"\n")
 
 	# Removing Punctuations
-	preprocessingTweet = re.sub(r'[^\w\s]','',preprocessingTweet)
+	preprocessingTweet = re.sub(r'[^\w\s]',' ',preprocessingTweet)
+	print("After removing punctuations:\n" ,preprocessingTweet)
+
+	preprocessingTweet = re.sub(r' +',' ',preprocessingTweet)
 	print("After removing punctuations:\n" ,preprocessingTweet)
 
 	preprocessedTweet = preprocessingTweet
