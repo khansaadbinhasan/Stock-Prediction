@@ -8,11 +8,10 @@ import sys , getopt
 import traceback
 import time
 
-# from configuring import *	
 from configuring import inputFileDJIA , outputFileDJIA , inputFileTwitter , intermediateFileTwitter , outputFileTwitter , doTwitterPreprocessing , doDJIAPreprocessing , PlotGraphs 
 
 def configurables(TwitterIntermediate,TwitterOutput,threshold=0.1,ZScaling=7.5):
-	sentimentDataset = pd.read_csv(TwitterIntermediate,encoding='ISO-8859-1',error_bad_lines=False,low_memory=False)
+	sentimentDataset = pd.read_csv(TwitterIntermediate,encoding='ISO-8859-1',error_bad_lines=False,low_memory=False,index_col=None)
 	sentimentDataset = sentimentDataset[sentimentDataset['subjectivity'] >= threshold ]
 
 	# Calculating Z-Scores
@@ -21,7 +20,7 @@ def configurables(TwitterIntermediate,TwitterOutput,threshold=0.1,ZScaling=7.5):
 
 	sentimentDataset['Z Score'] = ZScaling*(sentimentDataset['polarity'] - mu)/std
 	
-	sentimentDataset.to_csv(TwitterOutput, encoding='utf-8')
+	sentimentDataset.to_csv(TwitterOutput, encoding='utf-8',index=False)
 	print("Output File Generated at:",TwitterOutput)
 
 
@@ -125,7 +124,7 @@ def plot_all( company , sentimentDataset , DJIA ):
 
 
 def write_DJIA_Z_scores(DJIAinput,DJIAoutput):
-	DJIA = pd.read_csv(DJIAinput,low_memory=False,encoding='ISO-8859-1',error_bad_lines=False)	
+	DJIA = pd.read_csv( DJIAinput , low_memory = False , encoding = 'ISO-8859-1' , error_bad_lines = False , index_col = None )	
 	mu = DJIA['Adj Close'].mean()
 	std = DJIA['Adj Close'].std()
 	DJIA['Z Score'] = (DJIA['Adj Close'] - mu)/std
@@ -146,7 +145,7 @@ def run( configure , company = 'Accenture' , doTwitterPreprocessing = True , doD
 		print("Preparing DJIA...")
 		write_DJIA_Z_scores(DJIAinput,DJIAoutput)
 	
-	DJIA = pd.read_csv(DJIAoutput, encoding='utf-8',error_bad_lines=False,low_memory=False)
+	DJIA = pd.read_csv( DJIAoutput, encoding = 'utf-8' , error_bad_lines = False , low_memory = False , index_col = None )
 
 
 	# Twitter files
@@ -164,7 +163,7 @@ def run( configure , company = 'Accenture' , doTwitterPreprocessing = True , doD
 		print("Plotting...")
 		threshold , ZScaling = configure['threshold'] , configure['ZScaling']
 		configurables(TwitterIntermediate,TwitterOutput,threshold,ZScaling)
-		sentimentDataset = pd.read_csv(TwitterOutput, encoding='utf-8',error_bad_lines=False,low_memory=False )
+		sentimentDataset = pd.read_csv( TwitterOutput , encoding = 'utf-8' , error_bad_lines = False , low_memory = False , index_col = None )
 		plot_all(company,sentimentDataset,DJIA)
 
 
