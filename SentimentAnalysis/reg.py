@@ -13,14 +13,19 @@ def preprocess_tweet(tweetText):
 	print("After removing link:\n" ,preprocessingTweet,"\n")
 
 	# Removing Hashtags
-	preprocessingTweet = re.sub( r"#[A-Za-z0-9_]+" , 'HASHTAG' , preprocessingTweet )
+	preprocessingTweet = re.sub( r"#" , '' , preprocessingTweet )
 	print("After removing link:\n", preprocessingTweet,"\n")
+
+	# Removing Punctuations
+	preprocessingTweet = re.sub(r'[^\w\s]','',preprocessingTweet)
+	print("After removing punctuations:\n" ,preprocessingTweet)
 
 	preprocessedTweet = preprocessingTweet
 	
 	print("Final tweet:\n",preprocessedTweet,"\n")
 
 	return preprocessedTweet
+
 
 if __name__ == '__main__':
 	
@@ -35,7 +40,7 @@ if __name__ == '__main__':
 	tweet9 = "RT @deantak: bosch enters remote healthcare electronics monitoring business, competing with intel and GE http://tinyurl.com/dkea7r"
 	tweet10 = "IVT Intros Bluetooth 3.0 Commercial Stack for Intel Moblin and Google Android Platforms http://tmcnet.com/7563.1"
 	tweet11 = "Intel folk 4 work 4 better again RT @bobduffy Use Twitter to make difference. Follow & tweet @TysonFoods for hunger relief #BlogWell"
-	tweet12 = "@EricCartman69 can be considered as one of the greatest heroes of humanity #FuckYouGingers #AntiSemite123 #eternalracists #rightwingers http://gotohell.org"
+	tweet12 = "@EricCartman69 can. be. considered? as one..... of? the- greatest; heroes:- of humanity!!! #FuckYouGingers #AntiSemite123 #eternalracists #rightwingers http://gotohell.org"
 
 	# print("somehub")
 	print(preprocess_tweet(tweet12))
