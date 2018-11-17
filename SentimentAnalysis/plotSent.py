@@ -1,13 +1,17 @@
 import matplotlib.pyplot as plt
+import regex as re
 import pandas as pd
 import datetime
-from textblob import TextBlob
-from langdetect import detect
 import numpy as np
 import sys , getopt
 import traceback
 import time
 
+from textblob import TextBlob
+from langdetect import detect
+from autocorrect import spell
+from pandas.tools.plotting import lag_plot
+from statsmodels.tsa.stattools import grangercausalitytests 
 from configuring import inputFileDJIA , outputFileDJIA , inputFileTwitter , intermediateFileTwitter , outputFileTwitter , doTwitterPreprocessing , doDJIAPreprocessing , PlotGraphs 
 
 def configurables(TwitterIntermediate,TwitterOutput,threshold=0.1,ZScaling=7.5):
@@ -35,7 +39,7 @@ def prepare_data( TwitterInput , TwitterIntermediate ):
 	sentimentDataset['Date'] = sentimentDataset['DateTime'].dt.date
 	sentimentDataset.sort_values(by='DateTime',inplace=True)
 	sentimentDataset.reset_index()
-	sentimentDataset.dropna()
+	# sentimentDataset.dropna()
 
 	print("The Shape of the file now is:",sentimentDataset.shape)
 
@@ -48,6 +52,8 @@ def prepare_data( TwitterInput , TwitterIntermediate ):
 			text = rows['text']
 			date = rows['Date']
 
+			text = preprocess_tweet(text)
+
 			lang = detect(text)
 			sentimentDataset.loc[index,'lang'] = lang
 
@@ -56,6 +62,7 @@ def prepare_data( TwitterInput , TwitterIntermediate ):
 			subjectivity = analysis.sentiment[1]
 			sentimentDataset.loc[index,'polarity'] = polarity
 			sentimentDataset.loc[index,'subjectivity'] = subjectivity
+			sentimentDataset.loc[index,'text'] = text
 
 			day = date.strftime("%A")
 			sentimentDataset.loc[index,'Day'] = day
@@ -89,7 +96,7 @@ def prepare_data( TwitterInput , TwitterIntermediate ):
 	sentimentDataset = sentimentDataset[sentimentDataset['lang'] == 'en']
 	# sentimentDataset = sentimentDataset[sentimentDataset['Day'] != 'Sunday']
 	# sentimentDataset = sentimentDataset[sentimentDataset['Day'] != 'Saturday']
-	sentimentDataset = sentimentDataset[~( sentimentDataset['text'].str.contains('http') | sentimentDataset['text'].str.contains('https') )]
+	# sentimentDataset = sentimentDataset[~( sentimentDataset['text'].str.contains('http') | sentimentDataset['text'].str.contains('https') )]
 	sentimentDataset.set_index('Date',inplace=True)
 	
 	#Generating output
@@ -99,6 +106,35 @@ def prepare_data( TwitterInput , TwitterIntermediate ):
 
 	print(sentimentDataset)
 	
+
+def preprocess_tweet(tweetText):
+	
+	# print("Initial tweet:\n",tweetText,"\n")
+
+	# Removing usernames
+	preprocessingTweet = re.sub( r'@([A-Za-z0-9_]+)' , "USERNAME" , tweetText )
+	preprocessingTweet = re.sub( r"http\S+", 'URL' , preprocessingTweet )
+	preprocessingTweet = re.sub( r"#" , '' , preprocessingTweet )
+	preprocessingTweet = re.sub(r'[^\w\s]',' ',preprocessingTweet)
+	preprocessingTweet = re.sub(r'(.)\1+', r'\1\1', preprocessingTweet)
+	preprocessingTweet = re.sub(r'[0-9]+', '' , preprocessingTweet)
+	preprocessingTweet = re.sub( r":([a-z0-9A-Z_]+)" , '' , preprocessingTweet )
+	preprocessingTweet = re.sub(r"\b[pDo]\b", "", preprocessingTweet)
+	preprocessingTweet = re.sub(r' +',' ',preprocessingTweet)
+
+	preprocessedTweet = preprocessingTweet
+
+	# words = preprocessingTweet.split(' ')
+	# preprocessedTweet = ''
+
+	# for word in words:
+	# 	# print(word)
+	# 	preprocessedTweet = preprocessedTweet + ' ' + spell(word)
+
+	# print(preprocessedTweet)
+
+	return preprocessedTweet
+
 
 def plot_all( company , sentimentDataset , DJIA ):
 	DJIAdateList = DJIA['Date']
@@ -110,9 +146,10 @@ def plot_all( company , sentimentDataset , DJIA ):
 
 	# Plotting
 	plt.figure(company)
-
-	plt.plot(DJIA['Date'],DJIA['Z Score'],sentimentPlot)
-	plt.plot(sentimentPlot)
+	plt.plot(DJIA['Date'],DJIA['Z Score'])#,sentimentPlot)
+	# plt.plot(sentimentPlot)
+	# lag_plot(sentimentPlot,lag=3,ax=)
+	sentimentPlot.plot()
 
 	plt.xticks(rotation=30)
 	plt.ylabel('Z-Scores')
@@ -165,6 +202,9 @@ def run( configure , company = 'Accenture' , doTwitterPreprocessing = True , doD
 		configurables(TwitterIntermediate,TwitterOutput,threshold,ZScaling)
 		sentimentDataset = pd.read_csv( TwitterOutput , encoding = 'utf-8' , error_bad_lines = False , low_memory = False , index_col = None )
 		plot_all(company,sentimentDataset,DJIA)
+
+	# Find granger causality here
+	# print(grangercausalitytests(sentimentDataset[['Open', 'Close']], maxlag=1, addconst=True, verbose=True))
 
 
 def main(argv):

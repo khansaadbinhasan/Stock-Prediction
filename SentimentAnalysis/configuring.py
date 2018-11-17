@@ -8,8 +8,8 @@ intermediateFileTwitter = '../Datasets/New Companies/old{}.csv'
 outputFileTwitter = '../Datasets/New Companies/{}.csv'
 
 # Do Preprocessing
-doTwitterPreprocessing = False
-doDJIAPreprocessing = False
+doTwitterPreprocessing = True
+doDJIAPreprocessing = True
 
 # Plot Graphs
 PlotGraphs = True
