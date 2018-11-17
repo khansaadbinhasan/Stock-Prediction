@@ -20,8 +20,28 @@ def preprocess_tweet(tweetText):
 	preprocessingTweet = re.sub(r'[^\w\s]',' ',preprocessingTweet)
 	print("After removing punctuations:\n" ,preprocessingTweet)
 
+	# Removing multiple alphabets
+	preprocessingTweet = re.sub(r'(.)\1+', r'\1\1', preprocessingTweet)
+	print("Removing multiple alphabets:\n",preprocessingTweet)
+
+	# Removing numbers
+	preprocessingTweet = re.sub(r'[0-9]+', '' , preprocessingTweet)
+	print("After removing numbers:\n" ,preprocessingTweet)
+
+	# Removing multiple spaces
+	
+	# preprocessingTweet = re.sub(r' +',' ',preprocessingTweet)
+	# print("After removing multiple spaces:\n" ,preprocessingTweet)
+
+	# Remove emoticons --> some problems here
+	preprocessingTweet = re.sub( r":([a-z0-9A-Z_]+)" , '' , preprocessingTweet )
+	preprocessingTweet = re.sub(r"\b[pDo]\b", "", preprocessingTweet)
+	print("Removing emoticons:\n",preprocessingTweet)
+
+	# Removing multiple spaces
 	preprocessingTweet = re.sub(r' +',' ',preprocessingTweet)
-	print("After removing punctuations:\n" ,preprocessingTweet)
+	print("After removing multiple spaces:\n" ,preprocessingTweet)
+
 
 	preprocessedTweet = preprocessingTweet
 	
@@ -43,7 +63,7 @@ if __name__ == '__main__':
 	tweet9 = "RT @deantak: bosch enters remote healthcare electronics monitoring business, competing with intel and GE http://tinyurl.com/dkea7r"
 	tweet10 = "IVT Intros Bluetooth 3.0 Commercial Stack for Intel Moblin and Google Android Platforms http://tmcnet.com/7563.1"
 	tweet11 = "Intel folk 4 work 4 better again RT @bobduffy Use Twitter to make difference. Follow & tweet @TysonFoods for hunger relief #BlogWell"
-	tweet12 = "@EricCartman69 can. be. considered? as one..... of? the- greatest; heroes:- of humanity!!! #FuckYouGingers #AntiSemite123 #eternalracists #rightwingers http://gotohell.org"
+	tweet12 = "@EricCartman69 can. be. 0987 considered? as one..... of? the- greaaaaaaaaaateeeeeeest; heroes:- of humaaaaaaaanity!!! #FuckYouGingers #AntiSemite123 #eternalracists #rightwingers http://gotohell.org :) :( :p :D :o) :-)"
 
 	# print("somehub")
 	print(preprocess_tweet(tweet12))
