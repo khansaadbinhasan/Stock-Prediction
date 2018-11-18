@@ -146,10 +146,10 @@ def plot_all( company , sentimentDataset , DJIA ):
 
 	# Plotting
 	plt.figure(company)
-	plt.plot(DJIA['Date'],DJIA['Z Score'])#,sentimentPlot)
+	plt.plot(DJIA['Date'],DJIA['Z Score'],sentimentPlot)
 	# plt.plot(sentimentPlot)
 	# lag_plot(sentimentPlot,lag=3,ax=)
-	sentimentPlot.plot()
+	# sentimentPlot.plot()
 
 	plt.xticks(rotation=30)
 	plt.ylabel('Z-Scores')
