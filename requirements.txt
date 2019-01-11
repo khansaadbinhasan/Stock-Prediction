@@ -1,0 +1,10 @@
+matplotlib
+pandas 
+datetime
+textblob 
+langdetect
+numpy 
+sys
+getopt
+traceback
+time
