@@ -7,6 +7,9 @@ inputFileTwitter = '../Datasets/Companies 2017/{}.csv'
 intermediateFileTwitter = '../Datasets/New Companies/old{}.csv'
 outputFileTwitter = '../Datasets/New Companies/{}.csv'
 
+# Files to be saved
+grangerResultsPath = '../Results/grangerResult'
+
 # Do Preprocessing
 doTwitterPreprocessing = False
 doDJIAPreprocessing = False

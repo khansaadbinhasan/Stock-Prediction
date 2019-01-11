@@ -9,10 +9,11 @@ import time
 
 from textblob import TextBlob
 from langdetect import detect
-from autocorrect import spell
-from pandas.tools.plotting import lag_plot
 from statsmodels.tsa.stattools import grangercausalitytests
-from configuring import inputFileDJIA , outputFileDJIA , inputFileTwitter , intermediateFileTwitter , outputFileTwitter , doTwitterPreprocessing , doDJIAPreprocessing , PlotGraphs 
+from configuring import inputFileDJIA , outputFileDJIA , inputFileTwitter , intermediateFileTwitter , outputFileTwitter , doTwitterPreprocessing , doDJIAPreprocessing , PlotGraphs , grangerResultsPath
+
+########Use this only when you have put the stattoolsMod.py file in /lib/python3.6/site-packages/statsmodels/tsa#########
+# from statsmodels.tsa.stattoolsMod import grangercausalitytests 
 
 def configurables(TwitterIntermediate,TwitterOutput,threshold=0.1,ZScaling=7.5):
 	sentimentDataset = pd.read_csv(TwitterIntermediate,encoding='ISO-8859-1',error_bad_lines=False,low_memory=False,index_col=None)
@@ -124,15 +125,6 @@ def preprocess_tweet(tweetText):
 
 	preprocessedTweet = preprocessingTweet
 
-	# words = preprocessingTweet.split(' ')
-	# preprocessedTweet = ''
-
-	# for word in words:
-	# 	# print(word)
-	# 	preprocessedTweet = preprocessedTweet + ' ' + spell(word)
-
-	# print(preprocessedTweet)
-
 	return preprocessedTweet
 
 
@@ -147,9 +139,6 @@ def plot_all( company , sentimentDataset , DJIA ):
 	# Plotting
 	plt.figure(company)
 	plt.plot(DJIA['Date'],DJIA['Z Score'],sentimentPlot)
-	# plt.plot(sentimentPlot)
-	# lag_plot(sentimentPlot,lag=3,ax=)
-	# sentimentPlot.plot()
 
 	plt.xticks(rotation=30)
 	plt.ylabel('Z-Scores')
@@ -204,14 +193,16 @@ def run( configure , company = 'Accenture' , doTwitterPreprocessing = True , doD
 		sentimentPlot = plot_all(company,sentimentDataset,DJIA)
 
 	# Granger Causality
-	# x = np.asarray([[np.asarray(DJIA['Z Score']),np.asarray(sentimentDataset['Z Score'])]])
-	x1 = np.asarray(DJIA['Z Score'])[1:].reshape(19,1)
+	x1 = np.asarray(DJIA['Z Score'])[1:].reshape(19,1)#[1:] will not be needed if data is correct
 	x2 = np.asarray(sentimentPlot['Z Score']).reshape(19,1)
 	x = np.concatenate((x1,x2),axis=1)
-	maxlag = 1
-	# print("\n"*10,x.shape,"\n"*10)
+	maxlag = 5
 
-	grangercausalitytests(x, maxlag, addconst=True, verbose=True)
+	grangercausalitytests(x, maxlag, addconst=True, verbose=True )
+
+	########Use this only when you have put the stattoolsMod.py file in /lib/python3.6/site-packages/statsmodels/tsa#######
+	# grangercausalitytests(x, maxlag, addconst=True, verbose=True, saveto=grangerResultsPath )
+
 
 
 def main(argv):
