@@ -160,8 +160,6 @@ def plot_all( company , sentimentDataset , DJIA ):
 
 	return sentimentPlot
 
-
-
 def write_DJIA_Z_scores(DJIAinput,DJIAoutput):
 	DJIA = pd.read_csv( DJIAinput , low_memory = False , encoding = 'ISO-8859-1' , error_bad_lines = False , index_col = None )	
 	mu = DJIA['Adj Close'].mean()
@@ -173,8 +171,6 @@ def write_DJIA_Z_scores(DJIAinput,DJIAoutput):
 
 	return DJIA
 
-
-# def grangercausalitytests():
 
 def run( configure , company = 'Accenture' , doTwitterPreprocessing = True , doDJIAPreprocessing = True , PlotGraphs = True ):
 
@@ -211,9 +207,9 @@ def run( configure , company = 'Accenture' , doTwitterPreprocessing = True , doD
 	# x = np.asarray([[np.asarray(DJIA['Z Score']),np.asarray(sentimentDataset['Z Score'])]])
 	x1 = np.asarray(DJIA['Z Score'])[1:].reshape(19,1)
 	x2 = np.asarray(sentimentPlot['Z Score']).reshape(19,1)
-	x=np.concatenate((x1,x2),axis=1)
+	x = np.concatenate((x1,x2),axis=1)
 	maxlag = 1
-	print("\n"*10,x.shape,"\n"*10)
+	# print("\n"*10,x.shape,"\n"*10)
 
 	grangercausalitytests(x, maxlag, addconst=True, verbose=True)
 
