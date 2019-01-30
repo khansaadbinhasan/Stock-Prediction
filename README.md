@@ -42,7 +42,7 @@ python3 plotSent.py --company Accenture --Zscale 5 --threshold 0.1
 ```
 After running the above command Following graph was obtained:
 
-![Screenchot of Accenture graph](https://github.com/khansaadbinhasan/Stock-Prediction/blob/master/Screenshot%20from%202018-11-07%2023-26-07.png)
+![Screenshot of Accenture graph](https://github.com/khansaadbinhasan/Stock-Prediction/blob/master/Accenture.png)
 
 ## Files and Folders:
 * __*plotSent.py*__: Main file containing the code for preprocessing and plotting, Unless you need to do any changes to existing code you will not have to open it, use `configuring.py` to configure the parameters and use command line for tuning other parameters.     
