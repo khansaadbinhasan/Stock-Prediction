@@ -11,8 +11,8 @@ outputFileTwitter = '../Datasets/New Companies/{}.csv'
 grangerResultsPath = '../Results/grangerResult'
 
 # Do Preprocessing
-doTwitterPreprocessing = False
-doDJIAPreprocessing = False
+doTwitterPreprocessing = True
+doDJIAPreprocessing = True
 
 # Plot Graphs
 PlotGraphs = True

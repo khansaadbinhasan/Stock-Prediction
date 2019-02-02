@@ -29,7 +29,7 @@ def configurables(TwitterIntermediate,TwitterOutput,threshold=0.1,ZScaling=7.5):
 	print("Output File Generated at:",TwitterOutput)
 
 
-def prepare_data( TwitterInput , TwitterIntermediate ):
+def prepare_data(TwitterInput, TwitterIntermediate):
 	
 	#Reading File
 	sentimentDataset = pd.read_csv(TwitterInput,encoding='utf-8',error_bad_lines=False,index_col=None,engine='python')
@@ -40,10 +40,8 @@ def prepare_data( TwitterInput , TwitterIntermediate ):
 	sentimentDataset['Date'] = sentimentDataset['DateTime'].dt.date
 	sentimentDataset.sort_values(by='DateTime',inplace=True)
 	sentimentDataset.reset_index()
-	# sentimentDataset.dropna()
 
 	print("The Shape of the file now is:",sentimentDataset.shape)
-
 
 	#Finding Sentiment and making a new column for polarity and language
 	print(sentimentDataset.head)
@@ -54,25 +52,20 @@ def prepare_data( TwitterInput , TwitterIntermediate ):
 			date = rows['Date']
 
 			text = preprocess_tweet(text)
-
 			lang = detect(text)
-			sentimentDataset.loc[index,'lang'] = lang
+			polarity, subjectivity = TextBlob(text).sentiment
+			day = date.strftime("%A")
 
-			analysis = TextBlob(text)
-			polarity = analysis.sentiment[0]
-			subjectivity = analysis.sentiment[1]
+			sentimentDataset.loc[index,'lang'] = lang
 			sentimentDataset.loc[index,'polarity'] = polarity
 			sentimentDataset.loc[index,'subjectivity'] = subjectivity
 			sentimentDataset.loc[index,'text'] = text
-
-			day = date.strftime("%A")
 			sentimentDataset.loc[index,'Day'] = day
 			sentimentDataset.loc[index,'Date'] = date
 
 			if index % 500 is 0:
 				print("On row: ",index)
 				print(text)
-				print("Language of tweet is:",sentimentDataset.loc[index,'lang'])
 				print("Sentiment:\tPolarity:"+str(sentimentDataset.loc[index,'polarity'])+"\tSubjectivity:"+str(sentimentDataset.loc[index,'subjectivity']))
 				print("Day is:",sentimentDataset.loc[index,'Day'],"on:",sentimentDataset.loc[index,'Date'])
 				end = time.time()
@@ -95,9 +88,6 @@ def prepare_data( TwitterInput , TwitterIntermediate ):
 	# removing non-english tweets and writing to the output file
 	sentimentDataset.dropna()
 	sentimentDataset = sentimentDataset[sentimentDataset['lang'] == 'en']
-	# sentimentDataset = sentimentDataset[sentimentDataset['Day'] != 'Sunday']
-	# sentimentDataset = sentimentDataset[sentimentDataset['Day'] != 'Saturday']
-	# sentimentDataset = sentimentDataset[~( sentimentDataset['text'].str.contains('http') | sentimentDataset['text'].str.contains('https') )]
 	sentimentDataset.set_index('Date',inplace=True)
 	
 	#Generating output
@@ -109,10 +99,15 @@ def prepare_data( TwitterInput , TwitterIntermediate ):
 	
 
 def preprocess_tweet(tweetText):
-	
-	# print("Initial tweet:\n",tweetText,"\n")
+	"""
+		input: A Tweet
 
-	# Removing usernames
+		Replaces username with USERNAME token and url with URL token
+		Remove #, comma, full stop, digits, multiple alphabets in a word like woooooow to woow, multiple spaces
+
+		returns: Processed tweet
+	"""
+
 	preprocessingTweet = re.sub( r'@([A-Za-z0-9_]+)' , "USERNAME" , tweetText )
 	preprocessingTweet = re.sub( r"http\S+", 'URL' , preprocessingTweet )
 	preprocessingTweet = re.sub( r"#" , '' , preprocessingTweet )
