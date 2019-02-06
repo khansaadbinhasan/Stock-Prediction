@@ -11,6 +11,7 @@ import yaml
 from textblob import TextBlob
 from langdetect import detect
 from statsmodels.tsa.stattools import grangercausalitytests
+from statsmodels.tsa.api import VAR, DynamicVAR
 
 ########Use this only when you have put the stattoolsMod.py file in /lib/python3.6/site-packages/statsmodels/tsa#########
 # from statsmodels.tsa.stattoolsMod import grangercausalitytests 
@@ -230,6 +231,10 @@ def run( configure , company = 'Accenture' , doTwitterPreprocessing = True , doD
 
 	########Use this only when you have put the stattoolsMod.py file in /lib/python3.6/site-packages/statsmodels/tsa#######
 	# grangercausalitytests(x, maxlag, addconst=True, verbose=True, saveto=grangerResultsPath )
+
+	model = VAR(x)
+	results = model.fit(2)
+	print("\n"*4,results.summary())
 
 
 
