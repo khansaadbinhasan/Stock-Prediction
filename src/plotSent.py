@@ -6,16 +6,24 @@ import numpy as np
 import sys , getopt
 import traceback
 import time
+import yaml
 
 from textblob import TextBlob
 from langdetect import detect
 from statsmodels.tsa.stattools import grangercausalitytests
-from configuring import inputFileDJIA , outputFileDJIA , inputFileTwitter , intermediateFileTwitter , outputFileTwitter , doTwitterPreprocessing , doDJIAPreprocessing , PlotGraphs , grangerResultsPath
 
 ########Use this only when you have put the stattoolsMod.py file in /lib/python3.6/site-packages/statsmodels/tsa#########
 # from statsmodels.tsa.stattoolsMod import grangercausalitytests 
 
-def configurables(TwitterIntermediate,TwitterOutput,threshold=0.1,ZScaling=7.5):
+def configurables(TwitterIntermediate, TwitterOutput, threshold=0.1, ZScaling=7.5):
+	"""
+		input: Addresses to twitter files and configurables
+		
+		calculates Z-Scores for twitter data and makes the final .csv file
+	
+		returns: none
+	"""	
+
 	sentimentDataset = pd.read_csv(TwitterIntermediate,encoding='ISO-8859-1',error_bad_lines=False,low_memory=False,index_col=None)
 	sentimentDataset = sentimentDataset[sentimentDataset['subjectivity'] >= threshold ]
 
@@ -30,22 +38,29 @@ def configurables(TwitterIntermediate,TwitterOutput,threshold=0.1,ZScaling=7.5):
 
 
 def prepare_data(TwitterInput, TwitterIntermediate):
-	
+	"""
+	input:    TwitterInput: path to input database
+			  TwitterIntermediate: path to intermediate database to be created
+
+	Adds columns for language, polarity, subjectivity and Day, Does preprocessing and remove non-english or null tweets
+
+	returns:  nothing  		
+	"""
+
+
 	#Reading File
 	sentimentDataset = pd.read_csv(TwitterInput,encoding='utf-8',error_bad_lines=False,index_col=None,engine='python')
 
-	# Making a new column for grouping and Sorting according to DateTime
-	sentimentDataset.rename(columns={"date":"DateTime"},inplace=True)
-	sentimentDataset['DateTime'] = pd.to_datetime(sentimentDataset['DateTime'])
-	sentimentDataset['Date'] = sentimentDataset['DateTime'].dt.date
-	sentimentDataset.sort_values(by='DateTime',inplace=True)
+	# Making a new column for grouping and Sorting according to DateTime and add columns for language, polarity, subjectivity and day
+	sentimentDataset['date'] = pd.to_datetime(sentimentDataset['date'])
+	sentimentDataset['Date'] = sentimentDataset['date'].dt.date
+	sentimentDataset = pd.concat([sentimentDataset,pd.DataFrame(columns=list(['lang', 'polarity', 'subjectivity', 'Day']))],axis=1, verify_integrity = True)
 	sentimentDataset.reset_index()
 
-	print("The Shape of the file now is:",sentimentDataset.shape)
-
-	#Finding Sentiment and making a new column for polarity and language
+	print("The Shape of the Database is:",sentimentDataset.shape)
 	print(sentimentDataset.head)
 
+	#Finding Sentiment and making a new column for polarity and language
 	for index , rows in sentimentDataset.iterrows(): 	
 		try:
 			text = rows['text']
@@ -56,12 +71,7 @@ def prepare_data(TwitterInput, TwitterIntermediate):
 			polarity, subjectivity = TextBlob(text).sentiment
 			day = date.strftime("%A")
 
-			sentimentDataset.loc[index,'lang'] = lang
-			sentimentDataset.loc[index,'polarity'] = polarity
-			sentimentDataset.loc[index,'subjectivity'] = subjectivity
-			sentimentDataset.loc[index,'text'] = text
-			sentimentDataset.loc[index,'Day'] = day
-			sentimentDataset.loc[index,'Date'] = date
+			sentimentDataset.loc[index,['lang', 'polarity', 'subjectivity', 'text', 'Day', 'Date']] = lang, polarity, subjectivity, text, day, date
 
 			if index % 500 is 0:
 				print("On row: ",index)
@@ -80,13 +90,13 @@ def prepare_data(TwitterInput, TwitterIntermediate):
 			continue
 
 
+	# Sort values according to date and drop unnecessary columns and duplicate rows 
 	sentimentDataset.sort_values(by='Date',inplace=True)
-
 	sentimentDataset = sentimentDataset[['Date','Day','text','lang','polarity','subjectivity']]
 	sentimentDataset.drop_duplicates(subset=['text'],inplace=True)
 
 	# removing non-english tweets and writing to the output file
-	sentimentDataset.dropna()
+	sentimentDataset.dropna(inplace=True)
 	sentimentDataset = sentimentDataset[sentimentDataset['lang'] == 'en']
 	sentimentDataset.set_index('Date',inplace=True)
 	
@@ -124,6 +134,14 @@ def preprocess_tweet(tweetText):
 
 
 def plot_all( company , sentimentDataset , DJIA ):
+	"""
+		input: DJIA and twitter files 
+
+		makes the plot
+
+		returns: modified twitter dataframe
+	"""
+
 	DJIAdateList = DJIA['Date']
 	sentimentDataset = sentimentDataset[sentimentDataset['Date'].isin(DJIAdateList)]
 	sentimentPlot = sentimentDataset.groupby(['Date'])['Z Score'].mean().to_frame()
@@ -145,6 +163,14 @@ def plot_all( company , sentimentDataset , DJIA ):
 	return sentimentPlot
 
 def write_DJIA_Z_scores(DJIAinput,DJIAoutput):
+	"""
+		input: address of files
+
+		calculates Z-Scores for Adjusted Closing price of DJIA
+
+		returns: DJIA dataframe
+	"""
+
 	DJIA = pd.read_csv( DJIAinput , low_memory = False , encoding = 'ISO-8859-1' , error_bad_lines = False , index_col = None )	
 	mu = DJIA['Adj Close'].mean()
 	std = DJIA['Adj Close'].std()
@@ -157,10 +183,17 @@ def write_DJIA_Z_scores(DJIAinput,DJIAoutput):
 
 
 def run( configure , company = 'Accenture' , doTwitterPreprocessing = True , doDJIAPreprocessing = True , PlotGraphs = True ):
+	"""
+		input: Address of files
+
+		runs functions according to parameters given by user in yaml file
+		
+		returns: none 
+	"""
 
 	#DJIA files
-	DJIAinput = inputFileDJIA.format(company)
-	DJIAoutput = outputFileDJIA.format(company)
+	DJIAinput = configure['inputFileDJIA'].format(company)
+	DJIAoutput = configure['outputFileDJIA'].format(company)
 
 	if doDJIAPreprocessing == True:
 		print("Preparing DJIA...")
@@ -170,9 +203,9 @@ def run( configure , company = 'Accenture' , doTwitterPreprocessing = True , doD
 
 
 	# Twitter files
-	TwitterInput = inputFileTwitter.format(company)
-	TwitterIntermediate = intermediateFileTwitter.format(company)
-	TwitterOutput = outputFileTwitter.format(company)
+	TwitterInput = configure['inputFileTwitter'].format(company)
+	TwitterIntermediate = configure['intermediateFileTwitter'].format(company)
+	TwitterOutput = configure['outputFileTwitter'].format(company)
 
 
 	if doTwitterPreprocessing == True:
@@ -201,9 +234,16 @@ def run( configure , company = 'Accenture' , doTwitterPreprocessing = True , doD
 
 
 def main(argv):
-	configure = {}
+	"""
+		input: arguments from the command line
+		
+		processes command line input and takes input from yaml file and pass it to run function
 
-	configure['ZScaling'] , configure['threshold'] = 7.5 , 0.1
+		returns: none
+	"""
+
+	with open("../configure.yaml", "r") as file_descriptor:
+		configure = yaml.load(file_descriptor)
 
 	try:
 		opts, args = getopt.getopt(argv, "", ("company=", "Zscale=", "threshold="))
@@ -229,7 +269,7 @@ def main(argv):
 			configure['threshold'] = float(arg)
 
 	try:
-		run(configure=configure,company=company,doTwitterPreprocessing=doTwitterPreprocessing,doDJIAPreprocessing=doDJIAPreprocessing,PlotGraphs=PlotGraphs)
+		run(configure=configure,company=company,doTwitterPreprocessing=configure['doTwitterPreprocessing'],doDJIAPreprocessing=configure['doDJIAPreprocessing'],PlotGraphs=configure['PlotGraphs'])
 
 	except Exception as e:
 		traceback.print_exc()
@@ -241,7 +281,7 @@ def main(argv):
 		print("threshold: ",configure['threshold'])
 		
 		try:
-			run(configure=configure,doTwitterPreprocessing=doTwitterPreprocessing,doDJIAPreprocessing=doDJIAPreprocessing,PlotGraphs=PlotGraphs)
+			run(configure=configure,doTwitterPreprocessing=configure['doTwitterPreprocessing'],doDJIAPreprocessing=configure['doDJIAPreprocessing'],PlotGraphs=configure['PlotGraphs'])
 		
 		except Exception as e:
 			traceback.print_exc()
