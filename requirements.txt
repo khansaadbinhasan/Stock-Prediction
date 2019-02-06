@@ -1,12 +1,13 @@
 datetime
 getopt
-langdetect
-matplotlib
-numpy
-pandas 
-regex
-statsmodels
+langdetect == 1.0.7
+matplotlib == 3.0.2
+numpy == 1.15.4
+pandas == 0.23.4
+regex == 2019.1.24
+statsmodels == 0.9.0
 sys
 traceback
 time
-textblob 
+textblob == 0.15.2
+yaml == 3.13
